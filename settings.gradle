@@ -1,3 +1,0 @@
-rootProject.name = 'kafka-event-router'
-
-include 'mongodb-event-router'

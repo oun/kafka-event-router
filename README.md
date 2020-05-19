@@ -3,14 +3,13 @@ Kafka event router for mongodb debezium connector (https://debezium.io/blog/2019
 
 ### MongoDB Event Router
 
-Event or outbox collection:
+Event collection schema:
 
 | Field |  Type  |   Description   | 
 |-------|--------|-----------------|
-| _id   | string | Event id        |
+| _id   | string/object id | Event id        |
 | type  | string | Event type      |
 | aggregateId  | string | Aggregate id      |
-| aggregateType  | string | Aggregate type     |
 | aggregateType  | string | Aggregate type     |
 | payload  | string | Actual event json string |
 
@@ -18,10 +17,10 @@ Example Event document:
 ```json
 {
     "_id" : "1c65b115-1124-42ed-bca1-c6a80b29f1dd",
-    "type" : "UserUpdatedEvent",
+    "type" : "UserCreated",
     "aggregateId" : "cdceb9bd-5065-4c58-9333-119dee03eeb5",
     "aggregateType" : "User",
-    "payload" : "{\"id\":\"cdceb9bd-5065-4c58-9333-119dee03eeb5\",\"username\":\"shilva\",\"firstName\":\"Worawat\",\"lastName\":\"Wijarn\",\"aggregateId\":\"cdceb9bd-5065-4c58-9333-119dee03eeb5\",\"aggregateType\":\"User\"}"
+    "payload" : "{\"id\":\"cdceb9bd-5065-4c58-9333-119dee03eeb5\",\"username\":\"oun\",\"aggregateId\":\"cdceb9bd-5065-4c58-9333-119dee03eeb5\",\"aggregateType\":\"User\"}"
 }
 ```
 
@@ -95,21 +94,21 @@ curl -X POST \
   -H 'Content-Type: application/json' \
   -H 'cache-control: no-cache' \
   -d '{
-    "name": "mongodb-connector",
-    "config": {
-        "connector.class" : "io.debezium.connector.mongodb.MongoDbConnector",
-        "value.converter": "org.apache.kafka.connect.storage.StringConverter",
-        "tasks.max" : "1",
-        "mongodb.hosts" : "rs0/mongo1:27017",
-        "mongodb.name" : "jess",
-        "database.whitelist" : "user",
-        "collection.whitelist": "user.events",
-        "database.history.kafka.bootstrap.servers" : "broker:9092",
-        "transforms" : "router",
-        "transforms.router.type" : "com.logicdee.kafka.mongo.EventRouter"
-    }
-}
-'
+          "name": "mongodb-outbox-event",
+          "config": {
+              "connector.class": "io.debezium.connector.mongodb.MongoDbConnector",
+              "tasks.max": "1",
+              "initial.sync.max.threads": "1",
+              "mongodb.hosts": "rs0/mongo1:27017",
+              "mongodb.name": "mongodb",
+              "offset.flush.interval.ms": "3000",
+              "database.whitelist": "users",
+              "collection.whitelist": "users[.]outbox_events",
+              "transforms": "router",
+              "transforms.router.type": "io.github.oun.kafka.transform.outbox.MongoEventRouter",
+              "tombstones.on.delete": false
+          }
+      }'
 ```
 
 Reference
