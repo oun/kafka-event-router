@@ -20,7 +20,7 @@
         <version.log4j>1.2.17</version.log4j>
 
         <!-- Testing -->
-        <version.junit>4.12</version.junit>
+        <version.junit>4.13.1</version.junit>
         <version.mockito>2.13.0</version.mockito>
 
         <!-- Maven Plugins -->
